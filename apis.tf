@@ -5,7 +5,7 @@ resource "aws_api_gateway_rest_api" "rest-api" {
 resource "aws_api_gateway_resource" "user-resource" {
   parent_id   = aws_api_gateway_rest_api.rest-api.root_resource_id
   path_part   = "user"
-  rest_api_id = aws_api_gateway_rest_api.rest-api.i
+  rest_api_id = aws_api_gateway_rest_api.rest-api.id
 }
 
 
@@ -27,6 +27,7 @@ resource "aws_api_gateway_method" "user-post" {
   resource_id   = aws_api_gateway_resource.user-resource.id
   rest_api_id   = aws_api_gateway_rest_api.rest-api.id
   request_validator_id = aws_api_gateway_request_validator.validation.id
+  authorization_scopes = ["email"]
    request_parameters = {
     "method.request.header.Content-Type" = true
     "method.request.header.Authorizer" = true
@@ -39,14 +40,8 @@ resource "aws_api_gateway_method_response" "response_200" {
   http_method = aws_api_gateway_method.user-post.http_method
   status_code = "200"
 }
-resource "aws_api_gateway_integration_response" "MyDemoIntegrationResponse" {
-  rest_api_id = aws_api_gateway_rest_api.rest-api.id
-  resource_id = aws_api_gateway_resource.user-resource.id
-  http_method = aws_api_gateway_method.user-post.http_method
-  status_code = aws_api_gateway_method_response.response_200.status_code
-}
 
-resource "aws_api_gateway_integration" "integration" {
+resource "aws_api_gateway_integration" "post-integration" {
   rest_api_id             = aws_api_gateway_rest_api.rest-api.id
   resource_id             = aws_api_gateway_resource.user-resource.id
   http_method             = aws_api_gateway_method.user-post.http_method
@@ -88,13 +83,14 @@ resource "aws_api_gateway_method" "user-get" {
   resource_id   = aws_api_gateway_resource.user-resource.id
   rest_api_id   = aws_api_gateway_rest_api.rest-api.id
   request_validator_id = aws_api_gateway_request_validator.get-validation.id
+  authorization_scopes = ["email"]
    request_parameters = {
     "method.request.header.Content-Type" = true
     "method.request.header.Authorizer" = true
   }
 }
 
-resource "aws_api_gateway_integration" "integration" {
+resource "aws_api_gateway_integration" "get-integration" {
   rest_api_id             = aws_api_gateway_rest_api.rest-api.id
   resource_id             = aws_api_gateway_resource.user-resource.id
   http_method             = aws_api_gateway_method.user-get.http_method
